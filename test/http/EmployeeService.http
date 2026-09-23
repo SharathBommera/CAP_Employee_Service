@@ -1,0 +1,138 @@
+@server=http://localhost:4004
+@username=alice
+@password=
+
+
+### Employees
+# @name Employees_GET
+GET {{server}}/odata/v4/employee/Employees
+Authorization: Basic {{username}}:{{password}}
+
+
+### Employees
+# @name Employees_POST
+POST {{server}}/odata/v4/employee/Employees
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "employeeId": "13099315-0459-4c9e-868d-3d433d64c9dd",
+  "employeeName": "employeeName-1309931",
+  "employeeEmail": "employeeEmail-1309931",
+  "employeeDepartment": "employeeDepartment-1309931",
+  "employeeDesignation": "employeeDesignation-1309931",
+  "employeeJoiningDate": "2007-09-17",
+  "employeeComments": "employeeComments-1309931",
+  "createdAt": "2017-06-27T00:00:00.000Z",
+  "createdBy": "createdBy.s2qz@example.org",
+  "modifiedAt": "2021-07-20T00:00:00.000Z",
+  "modifiedBy": "modifiedBy.s2qz@example.org"
+}
+
+
+### Employees
+# @name Employees_PATCH
+PATCH {{server}}/odata/v4/employee/Employees/13099315-0459-4c9e-868d-3d433d64c9dd
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "employeeId": "13099315-0459-4c9e-868d-3d433d64c9dd",
+  "employeeName": "employeeName-1309931",
+  "employeeEmail": "employeeEmail-1309931",
+  "employeeDepartment": "employeeDepartment-1309931",
+  "employeeDesignation": "employeeDesignation-1309931",
+  "employeeJoiningDate": "2007-09-17",
+  "employeeComments": "employeeComments-1309931",
+  "createdAt": "2017-06-27T00:00:00.000Z",
+  "createdBy": "createdBy.s2qz@example.org",
+  "modifiedAt": "2021-07-20T00:00:00.000Z",
+  "modifiedBy": "modifiedBy.s2qz@example.org"
+}
+
+
+### Employees
+# @name Employees_DELETE
+DELETE {{server}}/odata/v4/employee/Employees/13099315-0459-4c9e-868d-3d433d64c9dd
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+
+### EmpTexts
+# @name EmpTexts_GET
+GET {{server}}/odata/v4/employee/EmpTexts
+Authorization: Basic {{username}}:{{password}}
+
+
+### EmpTexts
+# @name EmpTexts_POST
+POST {{server}}/odata/v4/employee/EmpTexts
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "locale": "pTexts-2599004",
+  "employeeComments": "employeeComments-2599004"
+}
+
+
+### EmpTexts
+# @name EmpTexts_PATCH
+PATCH {{server}}/odata/v4/employee/EmpTexts(locale=pTexts-2599004,employeeId=13099315-0459-4c9e-868d-3d433d64c9dd)
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "locale": "pTexts-2599004",
+  "employeeComments": "employeeComments-2599004"
+}
+
+
+### EmpTexts
+# @name EmpTexts_DELETE
+DELETE {{server}}/odata/v4/employee/EmpTexts(locale=pTexts-2599004,employeeId=13099315-0459-4c9e-868d-3d433d64c9dd)
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+
+### createEmployee
+# @name createEmployee_POST
+POST {{server}}/odata/v4/employee/createEmployee
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "employeeId": "23643701-fca4-48d5-9a34-8d84c3e55a8f",
+  "employeeName": "employeeName-23643701",
+  "employeeEmail": "employeeEmail-23643701",
+  "employeeDepartment": "employeeDepartment-23643701",
+  "employeeDesignation": "employeeDesignation-23643701",
+  "employeeJoiningDate": "2013-09-05"
+}
+
+
+### updateEmployee
+# @name updateEmployee_POST
+POST {{server}}/odata/v4/employee/updateEmployee
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "employeeId": "83194953-b510-4d42-a805-8377782b4369",
+  "employeeName": "employeeName-8319495",
+  "employeeEmail": "employeeEmail-8319495",
+  "employeeDepartment": "employeeDepartment-8319495",
+  "employeeDesignation": "employeeDesignation-8319495",
+  "employeeJoiningDate": "2020-12-17"
+}
+
+
+### deleteEmployee
+# @name deleteEmployee_POST
+POST {{server}}/odata/v4/employee/deleteEmployee
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "employeeId": "14305313-b2a8-46ef-8912-ba6f1c867f7b"
+}

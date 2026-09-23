@@ -1,0 +1,168 @@
+_schema-version: 3.3.0
+ID: employeeservice
+description: A simple CAP project.
+version: 1.0.0
+modules:
+  - name: employeeservice-srv
+    type: nodejs
+    path: gen/srv
+    requires:
+      - name: employeeservice-db
+      - name: uaa_employeeservice
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    parameters:
+      buildpack: nodejs_buildpack
+      instances: 1
+    build-parameters:
+      builder: npm-ci
+  - name: employeeservice-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: employeeservice-db
+    parameters:
+      buildpack: nodejs_buildpack
+  - name: employeeservice-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: employeeservice-destination-service
+        parameters:
+          content-target: true
+      - name: employeeservice_html_repo_host
+        parameters:
+          service-key:
+            name: employeeservice_html_repo_host-key
+      - name: uaa_employeeservice
+        parameters:
+          service-key:
+            name: uaa_employeeservice-key
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Name: ZEmpAR_employeeservice_html_repo_host
+              ServiceInstanceName: employeeservice-html5-app-host-service
+              ServiceKeyName: employeeservice_html_repo_host-key
+              sap.cloud.service: ZEmpAR
+            - Authentication: OAuth2UserTokenExchange
+              Name: ZEmpAR_uaa_employeeservice
+              ServiceInstanceName: employeeservice-xsuaa-service
+              ServiceKeyName: uaa_employeeservice-key
+              sap.cloud.service: ZEmpAR
+          existing_destinations_policy: ignore
+    build-parameters:
+      no-source: true
+  - name: employeeservice-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: employeeservice_html_repo_host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - employeeuimod.zip
+          name: employeeuimod
+          target-path: resources/
+        - artifacts:
+            - project1.zip
+          name: project1
+          target-path: resources/
+  - name: employeeuimod
+    type: html5
+    path: app/employeeuimod
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms:
+        []
+  - name: project1
+    type: html5
+    path: app/project1
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms:
+        []
+resources:
+  - name: employeeservice-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: employeeservice-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+              - Authentication: NoAuthentication
+                HTML5.DynamicDestination: true
+                HTML5.ForwardAuthToken: true
+                Name: srv-api
+                ProxyType: Internet
+                Type: HTTP
+                URL: ~{srv-api/srv-url}
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-name: employeeservice-destination-service
+      service-plan: lite
+    requires:
+      - name: srv-api
+  - name: employeeservice_html_repo_host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: employeeservice-html5-app-host-service
+      service-plan: app-host
+  - name: uaa_employeeservice
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        oauth2-configuration:
+          credential-types:
+            - binding-secret
+            - x509
+        role-collections:
+          - description: generated
+            name: Viewer (employeeservice ${org}-${space})
+            role-template-references:
+              - $XSAPPNAME.Viewer
+          - description: generated
+            name: Admin (employeeservice ${org}-${space})
+            role-template-references:
+              - $XSAPPNAME.Admin
+        tenant-mode: dedicated
+        xsappname: employeeservice-${org}-${space}
+      path: ./xs-security.json
+      service: xsuaa
+      service-name: employeeservice-xsuaa-service
+      service-plan: application
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
