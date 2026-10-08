@@ -1,59 +1,49 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -u
 
-PROJECT_DIR="/home/user/projects/employeeservice"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+STATE_DIR="$PROJECT_DIR/.git/bas-git-backup"
+LOG_FILE="$STATE_DIR/backup-scheduler.log"
+PID_FILE="$STATE_DIR/backup-scheduler.pid"
 BACKUP_SCRIPT="$PROJECT_DIR/scripts/github-backup.sh"
-LOG_DIR="/home/user/.logs"
-LOG_FILE="$LOG_DIR/backup-scheduler.log"
-PID_FILE="$LOG_DIR/backup-scheduler.pid"
+INTERVAL_SECONDS="${BACKUP_INTERVAL_SECONDS:-1800}"
+TERMINATE=0
 
-INTERVAL=1800   # 30 minutes
+mkdir -p "$STATE_DIR"
 
-mkdir -p "$LOG_DIR"
-
-# Prevent multiple scheduler instances
-if [ -f "$PID_FILE" ]; then
-    OLD_PID=$(cat "$PID_FILE")
-
-    if kill -0 "$OLD_PID" 2>/dev/null; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Scheduler already running with PID $OLD_PID"
-        exit 0
-    fi
-fi
-
-echo $$ > "$PID_FILE"
-
-cleanup() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Scheduler stopped" >> "$LOG_FILE"
-    rm -f "$PID_FILE"
-    exit 0
+log() {
+  printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >> "$LOG_FILE"
 }
 
-trap cleanup SIGTERM SIGINT EXIT
+if [[ -f "$PID_FILE" ]]; then
+  OLD_PID="$(cat "$PID_FILE" 2>/dev/null || true)"
+  if [[ -n "$OLD_PID" ]] && kill -0 "$OLD_PID" 2>/dev/null; then
+    log "Scheduler already running with PID $OLD_PID; exiting duplicate instance."
+    exit 0
+  fi
+  rm -f "$PID_FILE"
+fi
 
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] Scheduler started with PID $$" >> "$LOG_FILE"
+echo "$$" > "$PID_FILE"
 
-while true; do
+cleanup() {
+  rm -f "$PID_FILE"
+  log "Scheduler stopped."
+}
+trap cleanup EXIT
+trap 'TERMINATE=1' INT TERM
 
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Running GitHub backup..." >> "$LOG_FILE"
+log "Scheduler started with PID $$; interval $INTERVAL_SECONDS seconds."
 
-    cd "$PROJECT_DIR" || {
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Cannot access project directory" >> "$LOG_FILE"
-        sleep "$INTERVAL"
-        continue
-    }
+while [[ "$TERMINATE" -eq 0 ]]; do
+  if "$BACKUP_SCRIPT" >> "$LOG_FILE" 2>&1; then
+    :
+  else
+    log "Backup script returned a non-zero exit code; scheduler will retry later."
+  fi
 
-    "$BACKUP_SCRIPT" >> "$LOG_FILE" 2>&1
-
-    EXIT_CODE=$?
-
-    if [ "$EXIT_CODE" -eq 0 ]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Backup completed successfully." >> "$LOG_FILE"
-    else
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Backup failed with exit code $EXIT_CODE" >> "$LOG_FILE"
-    fi
-
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Next backup in 30 minutes." >> "$LOG_FILE"
-
-    sleep "$INTERVAL"
-
+  for ((i=0; i<INTERVAL_SECONDS && TERMINATE==0; i++)); do
+    sleep 1
+  done
 done
