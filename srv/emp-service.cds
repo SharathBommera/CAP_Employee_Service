@@ -18,26 +18,26 @@ service EmployeeService {//@(odata:'/admin'){
   //};
   //unbound function
   //function getEmployeeCount() returns Integer;
-  function getEmployeeCount(employeeId: Int16) returns Employees;
-  function readEmployee() returns array of Employees;
-  action createEmployee(
-      employeeId: UUID, 
-      employeeName:String, 
-      employeeEmail:String, 
-      employeeDepartment:String, 
-      employeeDesignation:String, 
-      employeeJoiningDate:Date
-  ) returns Employees;
+  // function getEmployeeCount(employeeId: Int16) returns Employees;
+  // function readEmployee() returns array of Employees;
+  // action createEmployee(
+  //     employeeId: UUID, 
+  //     employeeName:String, 
+  //     employeeEmail:String, 
+  //     employeeDepartment:String, 
+  //     employeeDesignation:String, 
+  //     employeeJoiningDate:Date
+  // ) returns Employees;
   
-  action updateEmployee(
-      employeeId: UUID, 
-      employeeName:String, 
-      employeeEmail:String, 
-      employeeDepartment:String, 
-      employeeDesignation:String, 
-      employeeJoiningDate:Date
-  ) returns Employees;
-  action deleteEmployee(employeeId: UUID) returns Boolean; 
+  // action updateEmployee(
+  //     employeeId: UUID, 
+  //     employeeName:String, 
+  //     employeeEmail:String, 
+  //     employeeDepartment:String, 
+  //     employeeDesignation:String, 
+  //     employeeJoiningDate:Date
+  // ) returns Employees;
+  // action deleteEmployee(employeeId: UUID) returns Boolean; 
 
   //unbound action
   // action onboardEmployee(

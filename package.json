@@ -27,16 +27,16 @@
     "i18n": {
       "default_language": "en_GB",
       "preserved_locales": [
-      "he", 
-      "de",
-      "en_GB",
-      "fr_CA",
-      "pt_PT",
-      "pt_BR",
-      "zh_CN",
-      "zh_HK",
-      "zh_TW"
-    ]
+        "he",
+        "de",
+        "en_GB",
+        "fr_CA",
+        "pt_PT",
+        "pt_BR",
+        "zh_CN",
+        "zh_HK",
+        "zh_TW"
+      ]
     },
     "requires": {
       "[production]": {
